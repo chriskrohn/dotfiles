@@ -20,6 +20,9 @@
 	# Add untracked, remove deleted, and show status
 	adda = !git add -A && git status
 
+	# Alias for reset
+	unstage = reset HEAD --
+
 	# Diff what is staged for the next commit
 	diffc = diff --cached
 
