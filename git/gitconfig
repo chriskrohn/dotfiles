@@ -1,0 +1,169 @@
+[alias]
+
+	# The defaults
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	df = diff
+	lg = log -p
+
+	# https://git.wiki.kernel.org/articles/a/l/i/Aliases.html
+
+	# `git remote prune origin`: remove remote-tracking branches that were deleted from the remote repo
+	# `git gc`: cleanup unnecessary files and optimize the local repository
+	# `git clean -df`: remove untracked files and directories from the working tree
+	# `git stash clear`: remove all stashed states
+	trim = !git remote prune origin && git gc
+	cleanup = !git clean -df && git stash clear
+
+	# Add untracked, remove deleted, and show status
+	adda = !git add -A && git status
+
+	# Diff what is staged for the next commit
+	diffc = diff --cached
+
+	# Diff overview
+	diffst = diff --stat
+
+	# Custom graph log (append any tree-ish)
+	graph = log --pretty=nice --date-order --graph
+
+	# Custom graph log for all branches
+	grapha = log --pretty=nice --date-order --graph --all
+
+	# Colored short git log
+	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date-order
+
+	# Colored long git log
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat --date-order --stat --abbrev-commit
+
+	# Show modified files in last commit
+	dl = "!git ll -1"
+
+	# Show a diff for the last commit
+	dlc = diff --cached HEAD^
+
+	# Diffstat log
+	logst = log --stat
+
+	# Short format diffstat log
+	logsf = log --stat --format=oneline --abbrev-commit
+
+	# More log options
+	lol = log --graph --decorate --pretty=oneline --abbrev-commit
+	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+
+	# Display the number of commits per author in numerical order
+	who = shortlog -sn --
+
+	# Display history of a file with diffs
+	filelog = log -u
+	fl = log -u
+
+	# Grep for a file
+	grep = grep -Ii
+	gr = grep -Ii
+	gra = "!f() { A=$(pwd) && TOPLEVEL=$(git rev-parse --show-toplevel) && cd $TOPLEVEL && git grep --full-name -In $1 | xargs -I{} echo $TOPLEVEL/{} && cd $A; }; f"
+
+	# List git aliases
+	la = "!git config -l | grep alias | cut -c 7-"
+
+	# Assume files as unchanged
+	assume = update-index --assume-unchanged
+	unassume = update-index --no-assume-unchanged
+	assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+	unassumeall = "!git assumed | xargs git update-index --no-assume-unchanged"
+	assumeall = "!git st -s | awk {'print $2'} | xargs git assume"
+
+	# Show the last tag
+	lasttag = describe --tags --abbrev=0
+	lt = describe --tags --abbrev=0
+
+	# Merge helpers
+	ours = "!f() { git co --ours $@ && git add $@; }; f"
+	theirs = "!f() { git co --theirs $@ && git add $@; }; f"
+
+[color]
+	ui = auto
+	interactive = auto
+	branch = auto
+	diff = auto
+	status = auto
+
+[color "branch"]
+	current = red reverse
+	local = blue
+	remote = green
+
+[color "diff"]
+	meta = yellow
+	frag = magenta
+	old = red bold
+	new = green
+	plain = white
+
+[color "status"]
+	added = yellow
+	changed = red
+	untracked = cyan
+
+[core]
+	excludesfile = /Users/void/.gitignore
+	attributesfile = ~/.gitattributes
+	autocrlf = input
+	safeclrf = false
+	safecrlf = false
+	ignorecase = true
+	trustctime = false
+	pager = less -x4
+
+[credential]
+	helper = osxkeychain
+
+[diff]
+	tool = Kaleidoscope
+
+[difftool]
+	prompt = false
+
+[pretty]
+	# tut: http://gitimmersion.com/lab_10.html
+	# ref: http://linux.die.net/man/1/git-log
+	# Result: <short-sha> <commit-message> (<pointer-names>) -- <commit-author-name>; <relative-time>
+	nice = "%C(yellow)%h%C(reset) %C(white)%s%C(cyan)%d%C(reset) -- %an; %ar"
+
+[push]
+	default = upstream
+
+[pull]
+	default = current
+
+[user]
+	name = Christopher Krohn
+	email = c.krohn@kernpunkt.de
+
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustexitcode = true
+
+[merge]
+	tool = Kaleidoscope
+
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+
+[mergetool]
+	prompt = false
+
+[filter "media"]
+	clean = git-media-clean %f
+	smudge = git-media-smudge %f

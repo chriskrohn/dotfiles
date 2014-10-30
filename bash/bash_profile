@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# bash_profile
+
+declare -a files=(
+	$HOME/.bash_aliases
+	$HOME/.rvm/scripts/rvm # Load RVM into a shell session *as a function*
+	$HOME/.dotfiles/bash/bash_config # Configuration
+	$HOME/.dotfiles/bash/bash_aliases # Aliases
+	$HOME/.dotfiles/bash/functions/* # Functions
+	$HOME/.dotfiles/bash/bash_prompt # Custom bash prompt
+	$HOME/.bash_profile.local # Local and private settings not under version control (e.g. git credentials)
+	$HOME/.dotfiles/bash/bash_paths # Path modifications (must source after `.bash_profile.local` in case of custom `brew` location)
+)
+
+# If these files are readable, source them
+for index in ${!files[*]}
+do
+	if [[ -r ${files[$index]} ]]; then
+		source ${files[$index]}
+	fi
+done
+
+unset files
+
+# Only use `brew` after it has been added to the PATH
+bash_completion_path="$(brew --prefix)/etc/bash_completion"
+
+# Source Bash completion (installed via Homebrew)
+if [[ -r $bash_completion_path ]]; then
+	source $bash_completion_path
+fi
+
+# Enable tab completion for `g` by marking it as an alias for `git`
+if type _git &> /dev/null && [ -f /usr/local/etc/bash_completion.d/git-completion.bash ]; then
+complete -o default -o nospace -F _git g;
+fi;
+
+# Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
+[ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2 | tr ' ' '\n')" scp sftp ssh;
+
+
+# [ -f /opt/local/etc/bash_completion ] && . /opt/local/etc/bash_completion
+# [ -f ~/.git-bash-completion.sh ] && . ~/.git-bash-completion.sh
+# [ -f ~/.git-flow-completion.sh ] && . ~/.git-flow-completion.sh
+
+export PATH=/usr/local/sbin:$PATH
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_60.jdk/Contents/Home
+
+# init z https://github.com/rupa/z
+. /usr/bin/z
+
+##
+# Your previous /Users/void/.bash_profile file was backed up as /Users/void/.bash_profile.macports-saved_2014-06-05_at_09:29:25
+##
+
+# MacPorts Installer addition on 2014-06-05_at_09:29:25: adding an appropriate PATH variable for use with MacPorts.
+export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+export PATH=/usr/local/opt/ruby/bin:$PATH
+
+# Environment variables for local development environment
+export VAGRANT_PATH_VIEWS_VA=$HOME/workspaces/de.vaillant/frontend/mainsites/templates-min
+export VAGRANT_PATH_VIEWS_SD=$HOME/workspaces/de.vaillant/frontend/mainsites-sd/templates-min
+export VAGRANT_PATH_VIEWS_VG=$HOME/workspaces/de.vaillant/frontend/mainsites-vg/templates-min
+export VAGRANT_PATH_CONFIGURATION=$HOME/workspaces/de.vaillant/configuration
+export VAGRANT_PATH_DIST_VA=$HOME/workspaces/de.vaillant/frontend/mainsites/dist
+export VAGRANT_PATH_DIST_SD=$HOME/workspaces/de.vaillant/frontend/mainsites-sd/dist
+export VAGRANT_PATH_DIST_VG=$HOME/workspaces/de.vaillant/frontend/mainsites-vg/dist
+export VAGRANT_PATH_MODELS=/var/www/vgoa/models
+export VAGRANT_PATH_MEDIA=/var/www/vgoa/media
+
+GRADLE_HOME=/usr/share/gradle
+export GRADLE_HOME
+export PATH=$PATH:$GRADLE_HOME/bin
+
+ACTIVATOR_HOME=/Users/void/activator
+export ACTIVATOR_HOME
+export PATH=$PATH:$ACTIVATOR_HOME
+
+# Finished adapting your PATH environment variable for use with MacPorts.
+
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
